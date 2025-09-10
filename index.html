@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>เกมบันไดงู 6x4</title>
+  <style>
+    body { 
+      font-family: 'Comic Sans MS', cursive, sans-serif; 
+      text-align: center;
+      background: linear-gradient(to bottom, #fff5cc, #e6f7ff);
+    }
+    h1 {
+      color: #ff6600;
+      text-shadow: 2px 2px #fff;
+    }
+    #board {
+      position: relative;
+      display: inline-block;
+      margin: 20px;
+    }
+    #board img {
+      width: 1000px;
+      border: 5px solid #ffcc66;
+      border-radius: 15px;
+      box-shadow: 0px 0px 20px rgba(0,0,0,0.2);
+    }
+    .player {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      position: absolute;
+      text-align: center;
+      line-height: 40px;
+      font-size: 24px;
+      transform: translate(-50%, -50%);
+      border: 3px solid white;
+      box-shadow: 0 0 10px rgba(0,0,0,0.3);
+    }
+    #p1 { background: #ff4d4d; }
+    #p2 { background: #4da6ff; }
+    #p3 { background: #33cc33; }
+    #p4 { background: #ff9900; }
+    #dice {
+      margin-top: 20px;
+      padding: 12px 25px;
+      font-size: 22px;
+      font-weight: bold;
+      cursor: pointer;
+      border: none;
+      border-radius: 10px;
+      background: #ff9933;
+      color: white;
+      box-shadow: 2px 2px 10px rgba(0,0,0,0.2);
+      transition: 0.2s;
+    }
+    #dice:hover {
+      background: #ff6600;
+    }
+    #status {
+      font-size: 20px;
+      margin-top: 10px;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+  <h1>🐍🪜 เกมบันไดงู 6x4 🎲</h1>
+  <div id="board">
+    <img src="board.jpg" alt="บอร์ดบันไดงู">
+    <div id="p1" class="player">🐰</div>
+    <div id="p2" class="player">🐱</div>
+    <div id="p3" class="player">🐢</div>
+    <div id="p4" class="player">🐵</div>
+  </div>
+  <div>
+    <button id="dice">ทอยลูกเต๋า 🎲</button>
+    <p id="status"></p>
+  </div>
+
+  <script>
+    const players = [
+      { id: "p1", pos: 0 },
+      { id: "p2", pos: 0 },
+      { id: "p3", pos: 0 },
+      { id: "p4", pos: 0 }
+    ];
+    let turn = 0;
+
+    // พิกัด 6x4 (24 ช่อง)
+    const positions = [];
+    const cols = 6;
+    const rows = 4;
+    const boardW = 1000; // scaled จาก 2000
+    const boardH = 707;  // scaled จาก 1414/2
+    const cellW = boardW / cols;
+    const cellH = boardH / rows;
+
+    for (let r = 0; r < rows; r++) {
+      let y = boardH - (r + 0.5) * cellH;
+      if (r % 2 === 0) {
+        // ซ้ายไปขวา
+        for (let c = 0; c < cols; c++) {
+          let x = (c + 0.5) * cellW;
+          positions.push([x, y]);
+        }
+      } else {
+        // ขวาไปซ้าย
+        for (let c = cols - 1; c >= 0; c--) {
+          let x = (c + 0.5) * cellW;
+          positions.push([x, y]);
+        }
+      }
+    }
+
+    function movePlayer(player) {
+      const el = document.getElementById(player.id);
+      if (positions[player.pos]) {
+        const [x,y] = positions[player.pos];
+        el.style.left = x + "px";
+        el.style.top = y + "px";
+      }
+    }
+
+    function rollDice() {
+      const dice = Math.floor(Math.random() * 6) + 1;
+      let player = players[turn];
+      let steps = dice;
+
+      function stepMove() {
+        if (steps > 0 && player.pos < positions.length-1) {
+          player.pos++;
+          movePlayer(player);
+          steps--;
+          setTimeout(stepMove, 400);
+        } else {
+          if (player.pos >= positions.length-1) {
+            document.getElementById("status").innerText = `🎉 ผู้เล่น ${turn+1} ชนะแล้ว!`;
+            document.getElementById("dice").disabled = true;
+          } else {
+            document.getElementById("status").innerText = `ผู้เล่น ${turn+1} ทอยได้ ${dice}`;
+          }
+          turn = (turn + 1) % players.length;
+        }
+      }
+
+      stepMove();
+    }
+
+    document.getElementById("dice").onclick = rollDice;
+
+    // เริ่มต้นตำแหน่ง
+    players.forEach(movePlayer);
+  </script>
+</body>
+</html>
